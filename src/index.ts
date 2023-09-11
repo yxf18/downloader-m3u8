@@ -1,12 +1,21 @@
+import { AESDecryptor } from "./aes-decryptor.js";
 const m3u8Url =
-  "http://1257120875.vod2.myqcloud.com/0ef121cdvodtransgzp1257120875/3055695e5285890780828799271/v.f230.m3u8";
+  //   "http://1257120875.vod2.myqcloud.com/0ef121cdvodtransgzp1257120875/3055695e5285890780828799271/v.f230.m3u8";
+  // "https://sf07.yww25.cn/video/2023-09-08/17/1700080863851065344/0bd88d1fa59e4eca8b513114ca351aa9.m3u8";
+"https://sf07.yww25.cn/video/2023-09-11/21/1701229531140468736/6c0a7b583edb45649e8dbdb0a546f276.m3u8";
 
-console.log("[ m3u8Url ]", m3u8Url);
-function add(x: number, y: number): number {
-  return x + y;
-}
+const aesConf: any = {
+  // AES 视频解密配置
+  method: "", // 加密算法
+  uri: "", // key 所在文件路径
+  iv: "", // 偏移值
+  key: "", // 秘钥
+  decryptor: null, // 解码器对象
 
-add(1, 2);
+  stringToBuffer: function (str: string | undefined) {
+    return new TextEncoder().encode(str);
+  },
+};
 
 const tsUrlList: (string | string[])[] = [];
 const finishList: { title: string; status: string; url: string }[] = [];
@@ -22,27 +31,32 @@ fetch(m3u8Url)
     }
     return response.text(); // 或者使用 response.blob()，取决于响应的类型
   })
-  .then((data) => {
-    // 处理 `m3u8` 文件的内容
-    console.log(data);
-    getUrlList(data);
-    console.log("[ finishList ]", finishList);
-    console.log("[ tsUrlList ]", tsUrlList);
-
-    // 仅获取视频片段数
+  .then((m3u8Str) => {
+    getUrlList(m3u8Str);
     rangeDownload.endSegment = finishList.length;
-
-    downloadTS();
+    // 检测视频 AES 加密
+    if (m3u8Str.indexOf("#EXT-X-KEY") > -1) {
+      aesConf.method = (m3u8Str.match(/(.*METHOD=([^,\s]+))/) || [
+        "",
+        "",
+        "",
+      ])[2];
+      aesConf.uri = (m3u8Str.match(/(.*URI="([^"]+))"/) || ["", "", ""])[2];
+      aesConf.iv = (m3u8Str.match(/(.*IV=([^,\s]+))/) || ["", "", ""])[2];
+      aesConf.iv = aesConf.iv ? aesConf.stringToBuffer(aesConf.iv) : "";
+      aesConf.uri = applyURL(aesConf.uri, m3u8Url);
+      getAES();
+    } else if (finishList.length > 0) {
+      // 如果视频没加密，则直接下载片段，否则先下载秘钥
+      downloadTS();
+    }
   })
-  .catch((error) => {
-    console.error("Fetch error:", error);
-  });
+  .catch((error) => {});
 
 function getUrlList(data: string) {
   // 提取 ts 视频片段地址
   data.split("\n").forEach((item) => {
     if (item && !item.startsWith("#")) {
-      console.log(item);
       tsUrlList.push(applyURL(item, m3u8Url));
       finishList.push({
         title: item,
@@ -83,15 +97,21 @@ function downloadTS() {
     if (index >= rangeDownload.endSegment) {
       return;
     }
-    downloadIndex++;
+
     const ts = finishList[index];
     if (ts && ts.status === "") {
       ts.status = "downloading";
       fetch(ts.url)
-        .then((res) => res.blob())
+        // .then((res) => res.blob())
+        .then((res) => res.arrayBuffer())
         .then((file) => {
-          blobs.push(file);
-          if (downloadIndex < rangeDownload.endSegment) {
+          //   blobs[downloadIndex] = file;
+          //   downloadIndex++;
+          if (downloadIndex < rangeDownload.endSegment - 1) {
+            // download();
+            const data = aesConf.uri ? aesDecrypt(file, index) : file;
+            blobs[downloadIndex] = data;
+            downloadIndex++;
             download();
           } else {
             downloadFile(blobs, "test");
@@ -108,7 +128,6 @@ function downloadTS() {
 
 // 处理 ts 片段，AES 解密、mp4 转码
 function dealTS(_file: any, _index: any, _callback: any) {
-  console.log("[ _file, _index, _callback ]", _file, _index, _callback);
   // const;
   // const data = this.aesConf.uri ? this.aesDecrypt(file, index) : file
   // this.conversionMp4(data, index, (afterData) => { // mp4 转码
@@ -154,4 +173,31 @@ function downloadFile(
   document.body.appendChild(a);
   a.click();
   a.remove();
+}
+
+// 获取AES配置
+function getAES() {
+  fetch(aesConf.uri)
+    .then((res) => res.arrayBuffer()) // 将响应数据转换为 ArrayBuffer
+    .then((buffer) => {
+      try {
+        aesConf.key = buffer; // 使用 Uint8Array 包装 ArrayBuffer
+        aesConf.decryptor = new AESDecryptor();
+        aesConf.decryptor.expandKey(aesConf.key);
+      } catch (error) {
+      }
+
+      
+      downloadTS();
+    })
+    .catch((error) => {});
+}
+
+// ts 片段的 AES 解码
+function aesDecrypt(data: ArrayBuffer, index: number) {
+  let iv =
+    aesConf.iv ||
+    new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, index]);
+  const decryptData = aesConf.decryptor.decrypt(data, 0, iv.buffer || iv, true);
+  return decryptData;
 }

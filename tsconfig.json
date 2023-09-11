@@ -2,8 +2,8 @@
   "compileOnSave": true,
   "compilerOptions": {
     "preserveConstEnums": true,
-    "target": "es6", // target 用来指定ts被编译为的es的版本
-    "module": "es6", // module 指定要使用的模块化的规范
+    "target": "ES6", // target 用来指定ts被编译为的es的版本
+    "module": "ES6", // module 指定要使用的模块化的规范
     // "lib": ["dom"], //lib 用来值当项目中要使用的库，一般不设置
     "outDir": "./dist", //将编译后的js文件同意放到dist目录下面
     // "outFile": "./dist/app.js", // 设置 outFire后，所有的全局作用域中的代码会合并到同一个文件中
