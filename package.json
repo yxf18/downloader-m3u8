@@ -1,0 +1,12 @@
+{
+  "name": "downloader-m3u8",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "node ./scripts/start.js",
+    "dev": "nodemon --exec ts-node src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

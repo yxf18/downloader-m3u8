@@ -1,0 +1,32 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "preserveConstEnums": true,
+    "target": "es6", // target 用来指定ts被编译为的es的版本
+    "module": "es6", // module 指定要使用的模块化的规范
+    // "lib": ["dom"], //lib 用来值当项目中要使用的库，一般不设置
+    "outDir": "./dist", //将编译后的js文件同意放到dist目录下面
+    // "outFile": "./dist/app.js", // 设置 outFire后，所有的全局作用域中的代码会合并到同一个文件中
+    "strict": false, // 所有严格检查的总开关 默认false
+    "allowJs": false, // 是否对js文件进行编译，默认是false
+    "checkJs": false, // 是否检查就是代码是否符合语法规范，默认是false
+    "removeComments": true, // 是否在编译后的js文件中移除注释
+    "noEmit": false, // 不生成编译后的js文件
+    "noEmitOnError": false, // 当有错误时不生产编译后的js文件
+    "alwaysStrict": false, // 用来设置编译后的文件是否使用严格模式，默认false
+    "noImplicitAny": true, // 不允许隐式的any类型  设置该项后 let a; a = "哈哈哈" 会报错 因为a 是隐式any类型 默认是false
+    "noImplicitThis": true, // 不允许不明确类型的this
+    "strictNullChecks": true, // 严格的检查空值
+
+    /* Linting */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": "src",
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}
