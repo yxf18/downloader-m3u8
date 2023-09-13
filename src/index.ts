@@ -1,8 +1,9 @@
+// @include http://699.su/
 import { AESDecryptor } from "./aes-decryptor.js";
 const m3u8Url =
   //   "http://1257120875.vod2.myqcloud.com/0ef121cdvodtransgzp1257120875/3055695e5285890780828799271/v.f230.m3u8";
-  // "https://sf07.yww25.cn/video/2023-09-08/17/1700080863851065344/0bd88d1fa59e4eca8b513114ca351aa9.m3u8";
-"https://sf07.yww25.cn/video/2023-09-11/21/1701229531140468736/6c0a7b583edb45649e8dbdb0a546f276.m3u8";
+  "https://sf07.yww25.cn/video/2023-09-08/17/1700080863851065344/0bd88d1fa59e4eca8b513114ca351aa9.m3u8";
+// "https://sf07.yww25.cn/video/2023-09-11/21/1701229531140468736/6c0a7b583edb45649e8dbdb0a546f276.m3u8";
 
 const aesConf: any = {
   // AES 视频解密配置
