@@ -1,4 +1,4 @@
-// @include http://699.su/
+// @include http://xxx.com/
 import { AESDecryptor } from "./aes-decryptor.js";
 const m3u8Url =
   //   "http://1257120875.vod2.myqcloud.com/0ef121cdvodtransgzp1257120875/3055695e5285890780828799271/v.f230.m3u8";
